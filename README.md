@@ -1,20 +1,97 @@
-#Introduction
+# Production Embedding Service
 
-Building reliable embedding services is one of the most critical components in modern RAG-based AI systems. While most developers focus on model accuracy, in production environments the real challenges often emerge from system integration, performance stability, and deployment constraints rather than the model itself.
+A production-ready embedding service built with Hugging Face Transformers.
 
-In this case study, I will walk through a real-world issue encountered while building a Persian embedding service using the Tooka-SBERT-V2-Small model inside a Dockerized FastAPI application.
+This repository documents a real-world debugging journey where a
+SentenceTransformers-based embedding service failed inside Docker
+while working correctly on a local machine.
 
-The system worked flawlessly on a local machine. However, after deploying it to a development server using Docker, an unexpected issue appeared: the service would hang silently during initialization of SentenceTransformers, without throwing any errors or consuming noticeable system resources.
+The project covers:
 
-At first glance, the problem seemed related to memory, CPU, or model corruption. However, after a systematic debugging process, the root cause turned out to be something entirely different: the interaction between sentence-transformers, specific dependency versions, and the Docker runtime environment.
+- Debugging a silent AI service failure
+- Replacing SentenceTransformers with native Transformers inference
+- Building a reliable embedding pipeline
+- CPU optimization techniques
+- Batch processing
+- Embedding caching
+- Production deployment considerations
 
-This article documents:
 
-The original system architecture
-The debugging process step-by-step
-Why common assumptions (RAM, CPU, file corruption) were misleading
-The actual root cause of the issue
-How replacing SentenceTransformers with Hugging Face AutoModel resolved the problem
-Performance improvements and production optimizations applied afterward
+## Architecture
 
-By the end of this article, you will see why sometimes the simplest abstraction layer can become the hardest point of failure in production systems, and why having full control over model inference can significantly improve reliability and performance.
+Initial architecture:
+
+FastAPI
+    |
+    v
+SentenceTransformer
+    |
+    v
+Embedding Vector
+    |
+    v
+ChromaDB
+
+
+Final architecture:
+
+FastAPI
+    |
+    v
+Embedding Service
+    |
+    +--> AutoTokenizer
+    |
+    +--> AutoModel
+    |
+    +--> Mean Pooling
+    |
+    +--> Normalization
+    |
+    v
+Embedding Vector
+
+
+## Problem
+
+The service worked locally but hung inside Docker during:
+
+SentenceTransformer(model_path)
+
+
+No exception was raised.
+No memory issue occurred.
+The process simply stopped progressing.
+
+
+## Solution
+
+The embedding pipeline was rewritten using:
+
+- transformers.AutoTokenizer
+- transformers.AutoModel
+- custom pooling
+- torch.inference_mode()
+
+
+## Experiments
+
+The repository contains reproducible experiments:
+
+- tokenizer loading test
+- model loading test
+- SentenceTransformer isolation test
+- performance benchmark
+- memory profiling
+
+
+## Model
+
+Example model:
+
+Tooka-SBERT-V2-Small
+
+
+## License
+
+MIT
