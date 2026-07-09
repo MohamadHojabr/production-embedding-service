@@ -16,6 +16,9 @@ The project covers:
 - Embedding caching
 - Production deployment considerations
 
+# 📖 Read the full technical article on Medium:
+
+https://medium.com/@s.mohamad.hojabr/building-a-production-ready-embedding-service-from-sentencetransformer-to-native-transformers-8036d038ab9d
 
 ## Architecture
 
